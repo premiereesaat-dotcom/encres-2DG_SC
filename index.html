@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Atelier Encres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+/* Mise en page : un cahier de fabrication d'imprimeur — bande de contrôle CMJN en tête, fiches numérotées dans l'ordre de la séance, panneaux de manipulation à droite du texte. */
+:root{
+  --paper:#F6F7F9; --sheet:#FFFFFF; --ink:#15171F; --muted:#5A6070; --rule:#D9DDE5;
+  --c:#009FD8; --m:#D6006F; --y:#F5C400; --k:#15171F;
+  --accent:#0A6E99; --ok:#1E8A4C; --warn:#B4560A; --bad:#B3122E;
+  --field:#FFFFFF; --soft:#EEF1F5;
+  --f-display:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+  --f-body:"IBM Plex Sans","Segoe UI",Roboto,Arial,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#11141A; --sheet:#181C24; --ink:#E8EAF0; --muted:#9AA2B2; --rule:#2C3240;
+  --accent:#4DB8E6; --ok:#4CC27E; --warn:#E89A4C; --bad:#F06A80; --field:#0E1116; --soft:#1F2430; --k:#E8EAF0;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#11141A; --sheet:#181C24; --ink:#E8EAF0; --muted:#9AA2B2; --rule:#2C3240;
+  --accent:#4DB8E6; --ok:#4CC27E; --warn:#E89A4C; --bad:#F06A80; --field:#0E1116; --soft:#1F2430; --k:#E8EAF0;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.6 var(--f-body)}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.colorbar{display:flex;height:10px}
+.colorbar span{flex:1}
+.wrap{max-width:1180px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header.top{padding-block:40px 24px;border-bottom:1px solid var(--rule)}
+.eyebrow{font:600 12px/1 var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,6vw,64px);font-weight:700;letter-spacing:-.02em;margin-top:10px}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%,color-mix(in srgb,var(--y) 70%,transparent) 62%)}
+h2{font-size:clamp(26px,3.4vw,36px);font-weight:700}
+h3{font-size:19px;font-weight:700}
+p{margin:0}
+.lead{max-width:68ch;font-size:18px;color:var(--muted);margin-top:14px}
+nav.steps{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--paper)}
+nav.steps ol{list-style:none;margin:0;padding:10px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+nav.steps a{display:flex;align-items:center;gap:8px;white-space:nowrap;text-decoration:none;color:var(--ink);font:500 14px var(--f-body);padding:6px 10px;border-radius:6px;border:1px solid transparent}
+nav.steps a:hover,nav.steps a:focus-visible{border-color:var(--rule);background:var(--sheet);outline:none}
+nav.steps .n{font:600 11px var(--f-mono);color:var(--muted)}
+nav.steps .dot{width:8px;height:8px;border-radius:50%;background:var(--rule)}
+nav.steps a.done .dot{background:var(--ok)}
+main{display:grid;gap:56px;padding-block:40px 80px}
+section.block{display:grid;gap:22px;scroll-margin-top:70px}
+.sec-head{display:grid;gap:8px;border-top:3px solid var(--ink);padding-top:14px}
+.sec-head .tag{display:flex;gap:10px;align-items:center}
+.swatch{width:14px;height:14px;display:inline-block;border-radius:2px}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:28px;align-items:start}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
+.prose{display:grid;gap:12px;max-width:66ch}
+.prose ul{margin:0;padding-left:20px;display:grid;gap:6px}
+.pair{display:grid;gap:10px}
+.pair .label{font:600 11px/1 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.lab{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+.lab canvas{width:100%;height:auto;display:block;border-radius:6px;background:var(--soft)}
+.lab .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.lab label{font-size:14px;color:var(--muted)}
+.readout{font:600 14px var(--f-mono);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--accent)}
+button,.btn{font:600 14px var(--f-body);padding:9px 14px;border-radius:7px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--ink)}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button.seg[aria-pressed=true]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.note{border-left:3px solid var(--c);background:var(--sheet);padding:12px 14px;font-size:15px;border-radius:0 8px 8px 0}
+.note.m{border-color:var(--m)} .note.y{border-color:var(--y)} .note.k{border-color:var(--ink)}
+.note b{font-family:var(--f-display)}
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:8px;background:var(--sheet)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font:600 11px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--soft)}
+td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.q{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:16px;display:grid;gap:12px}
+.q h3{font-size:16px;display:flex;gap:8px;align-items:baseline}
+.q h3 .qn{font:600 12px var(--f-mono);color:var(--accent)}
+.q .hint{font-size:14px;color:var(--muted)}
+textarea,input[type=text],input[type=url],select{width:100%;font:15px/1.5 var(--f-body);color:var(--ink);background:var(--field);border:1px solid var(--rule);border-radius:7px;padding:9px 11px}
+textarea{min-height:96px;resize:vertical}
+.count{font:12px var(--f-mono);color:var(--muted);text-align:right}
+.id-card{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:760px){.id-card{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+.field{display:grid;gap:4px}
+.field span{font-size:13px;color:var(--muted)}
+.plan{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.plan div{background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px 12px;font-size:14px}
+.plan .t{font:600 12px var(--f-mono);color:var(--accent);display:block}
+.quiz{display:grid;gap:14px}
+.quiz fieldset{border:1px solid var(--rule);border-radius:10px;padding:14px;margin:0;background:var(--sheet);display:grid;gap:8px}
+.quiz legend{font-weight:600;padding:0 6px}
+.quiz label{display:flex;gap:8px;align-items:flex-start;font-size:15px;cursor:pointer}
+.quiz .fb{font-size:14px}
+.quiz .fb.ok{color:var(--ok)} .quiz .fb.no{color:var(--bad)}
+.sources{display:grid;gap:12px}
+.src{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+.src .w2{grid-column:span 2}.src .w3{grid-column:span 3}.src .w6{grid-column:span 6}
+@media (max-width:760px){.src{grid-template-columns:minmax(0,1fr)}.src .w2,.src .w3,.src .w6{grid-column:auto}}
+.src .head{display:flex;justify-content:space-between;align-items:center}
+.cases{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.case{position:relative;background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:14px;cursor:pointer;display:grid;gap:6px}
+.case input{position:absolute;opacity:0}
+.case:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.case:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:2px}
+.case b{font-family:var(--f-display);font-size:17px}
+.case p{font-size:14px;color:var(--muted)}
+.selfeval{display:grid;gap:8px}
+.selfeval .r{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:10px;align-items:center;background:var(--sheet);border:1px solid var(--rule);border-radius:8px;padding:10px 12px}
+@media (max-width:600px){.selfeval .r{grid-template-columns:minmax(0,1fr)}}
+.lvl{display:flex;gap:6px;flex-wrap:wrap}
+.lvl label{font-size:13px;border:1px solid var(--rule);border-radius:20px;padding:4px 10px;cursor:pointer}
+.lvl input{position:absolute;opacity:0;pointer-events:none}
+.lvl label:has(input:checked){background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.final{background:var(--ink);color:var(--paper);border-radius:12px;padding:22px;display:grid;gap:14px}
+.final h2{color:var(--paper)}
+.final .row{display:flex;flex-wrap:wrap;gap:10px}
+.final button{background:var(--paper);color:var(--ink);border-color:var(--paper)}
+.final button.ghost{background:transparent;color:var(--paper);border-color:color-mix(in srgb,var(--paper) 50%,transparent)}
+.checklist{list-style:none;margin:0;padding:0;display:grid;gap:4px;font-size:14px}
+.checklist li::before{content:"○ ";color:color-mix(in srgb,var(--paper) 60%,transparent)}
+.checklist li.ok::before{content:"● ";color:#5FD38D}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:8px;font-size:14px;z-index:50}
+.cmyk svg{width:100%;max-width:340px;height:auto;display:block;margin:0 auto}
+footer{border-top:1px solid var(--rule);padding-block:20px 40px;color:var(--muted);font-size:13px}
+#report{display:none}
+
+/* ===== Impression : seul le dossier est imprimé ===== */
+@media print{
+  @page{size:A4;margin:16mm 15mm 18mm}
+  :root{--paper:#fff;--ink:#000;--muted:#444;--rule:#bbb;color-scheme:light}
+  body{background:#fff;color:#000;font-size:10.5pt}
+  body>*:not(#report){display:none!important}
+  body::before{display:none}
+  #report{display:block!important}
+}
+#report{font:10.5pt/1.45 var(--f-body);color:#000}
+#report .rbar{display:flex;height:6px;margin-bottom:10px}
+#report .rbar span{flex:1}
+#report h1{font-size:20pt;margin:0 0 2px}
+#report h2{font-size:13pt;margin:16px 0 6px;padding-bottom:3px;border-bottom:1.5px solid #000;break-after:avoid}
+#report h3{font-size:11pt;margin:10px 0 3px;break-after:avoid}
+#report .meta{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid #000;margin:8px 0}
+#report .meta div{padding:5px 7px;border-right:1px solid #000}
+#report .meta div:last-child{border-right:0}
+#report .meta small{display:block;font:8pt var(--f-mono);text-transform:uppercase;color:#444}
+#report .ans{white-space:pre-wrap;border-left:2px solid #999;padding:2px 0 2px 8px;margin:2px 0 6px;break-inside:avoid}
+#report .empty{color:#a00;font-style:italic}
+#report table{font-size:9pt;margin:4px 0}
+#report th,#report td{border:1px solid #888;padding:4px 6px}
+#report th{background:#eee;color:#000}
+#report .grid-eval td:not(:first-child){text-align:center;width:13%}
+#report .sign{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:14px}
+#report .sign div{border:1px solid #000;height:70px;padding:5px;font-size:9pt}
+#report .foot{margin-top:10px;font-size:8pt;color:#444}
+</style>
+</head>
+<body>
+
+<div class="colorbar" aria-hidden="true"><span style="background:var(--c)"></span><span style="background:var(--m)"></span><span style="background:var(--y)"></span><span style="background:#15171F"></span><span style="background:color-mix(in srgb,var(--c) 50%,var(--m))"></span><span style="background:color-mix(in srgb,var(--m) 50%,var(--y))"></span><span style="background:color-mix(in srgb,var(--y) 50%,var(--c))"></span><span style="background:#8A8F99"></span></div>
+
+<header class="top">
+  <div class="wrap">
+    <div class="eyebrow">ESAAT · DN MADe Graphisme · Supports connectés · Physique-chimie</div>
+    <h1>Ce que l'encre <em>impose</em> au graphiste</h1>
+    <p class="lead">Viscosité, séchage, pigments, mouillabilité : derrière chaque choix d'impression il y a de la physique et de la chimie. Vous allez manipuler les phénomènes, les relier à des situations d'agence, chercher des sources fiables, puis rédiger une synthèse. À la fin, vous générez votre dossier PDF.</p>
+  </div>
+</header>
+
+<nav class="steps" aria-label="Étapes de la séance">
+  <div class="wrap">
+    <ol id="stepnav">
+      <li><a href="#identite" data-step="identite"><span class="dot"></span><span class="n">00</span>Identité</a></li>
+      <li><a href="#composition" data-step="composition"><span class="dot"></span><span class="n">01</span>Composition</a></li>
+      <li><a href="#viscosite" data-step="viscosite"><span class="dot"></span><span class="n">02</span>Viscosité</a></li>
+      <li><a href="#sechage" data-step="sechage"><span class="dot"></span><span class="n">03</span>Séchage</a></li>
+      <li><a href="#pigment" data-step="pigment"><span class="dot"></span><span class="n">04</span>Pigment / colorant</a></li>
+      <li><a href="#mouillage" data-step="mouillage"><span class="dot"></span><span class="n">05</span>Mouillabilité</a></li>
+      <li><a href="#couleur" data-step="couleur"><span class="dot"></span><span class="n">06</span>Couleur &amp; papier</a></li>
+      <li><a href="#speciales" data-step="speciales"><span class="dot"></span><span class="n">07</span>Encres spéciales</a></li>
+      <li><a href="#quiz" data-step="quiz"><span class="dot"></span><span class="n">08</span>Quiz</a></li>
+      <li><a href="#recherche" data-step="recherche"><span class="dot"></span><span class="n">09</span>Recherche</a></li>
+      <li><a href="#cas" data-step="cas"><span class="dot"></span><span class="n">10</span>Cas client</a></li>
+      <li><a href="#synthese" data-step="synthese"><span class="dot"></span><span class="n">11</span>Synthèse</a></li>
+      <li><a href="#export" data-step="export"><span class="dot"></span><span class="n">12</span>PDF</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<!-- 00 IDENTITÉ -->
+<section class="block" id="identite">
+  <div class="sec-head"><div class="tag"><span class="eyebrow">00 · Avant de commencer</span></div><h2>Votre identité et le déroulé</h2></div>
+  <div class="id-card">
+    <label class="field"><span>Nom *</span><input type="text" id="nom" data-k="nom" autocomplete="family-name"></label>
+    <label class="field"><span>Prénom *</span><input type="text" id="prenom" data-k="prenom" autocomplete="given-name"></label>
+    <label class="field"><span>Classe / groupe</span><input type="text" id="classe" data-k="classe" placeholder="ex. DN MADe 2 – SC"></label>
+    <label class="field"><span>Date</span><input type="text" id="date" data-k="date"></label>
+  </div>
+  <div class="plan">
+    <div><span class="t">0:00 – 0:10</span>Identité, fiche 01</div>
+    <div><span class="t">0:10 – 0:55</span>Fiches 02 à 07 (≈ 7 min chacune)</div>
+    <div><span class="t">0:55 – 1:05</span>Quiz</div>
+    <div><span class="t">1:05 – 1:25</span>Recherche documentaire</div>
+    <div><span class="t">1:25 – 1:45</span>Cas client</div>
+    <div><span class="t">1:45 – 2:00</span>Synthèse et PDF</div>
+  </div>
+  <p class="note k"><b>Vos réponses sont enregistrées automatiquement</b> dans ce navigateur, sur cet ordinateur. Pour changer de poste, utilisez « Télécharger ma sauvegarde » en bas de page, puis « Reprendre une sauvegarde » sur l'autre poste.</p>
+</section>
+
+<!-- 01 COMPOSITION -->
+<section class="block" id="composition">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--k)"></span><span class="eyebrow">01 · Bases</span></div><h2>Une encre, c'est quatre familles d'ingrédients</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p>Toutes les encres d'imprimerie partagent la même architecture. Ce qui change d'une technique à l'autre, ce sont les proportions et la nature chimique de chaque famille.</p>
+      <ul>
+        <li><b>La matière colorante</b> : pigment (particules solides insolubles, 0,1 à 1 µm environ) ou colorant (molécules dissoutes). Elle donne la couleur et l'opacité.</li>
+        <li><b>Le liant</b> (ou vernis) : résines, huiles, polymères. Il enrobe les pigments et forme, en séchant, un <i>film</i> qui les colle au support. Sans liant, le pigment repart en poussière.</li>
+        <li><b>Le solvant ou diluant</b> : eau, alcools, huiles minérales ou végétales. Il règle la fluidité et s'élimine (évaporation, absorption) ou réagit au séchage.</li>
+        <li><b>Les additifs</b> (quelques %) : siccatifs qui accélèrent le séchage, cires anti-frottement, agents mouillants, anti-mousse, photo-amorceurs pour les encres UV.</li>
+      </ul>
+      <p>Une encre offset contient typiquement 15 à 25 % de pigment ; une encre jet d'encre aqueuse, seulement quelques %, dans beaucoup d'eau.</p>
+    </div>
+    <div class="lab">
+      <div class="pair"><span class="label">Comparer deux recettes</span></div>
+      <div class="row"><button class="seg" aria-pressed="true" data-recipe="offset">Offset (pâteuse)</button><button class="seg" aria-pressed="false" data-recipe="jet">Jet d'encre (fluide)</button><button class="seg" aria-pressed="false" data-recipe="flexo">Flexo à l'eau</button></div>
+      <canvas id="cvRecipe" width="560" height="230" aria-label="Diagramme en barres de la composition de l'encre choisie"></canvas>
+      <p class="readout" id="recipeTxt"></p>
+      <p class="hint" style="font-size:13px;color:var(--muted)">Proportions indicatives (ordres de grandeur), variables selon les fabricants.</p>
+    </div>
+  </div>
+  <div class="q"><h3><span class="qn">Q1</span>Analyse</h3><p>En comparant les recettes, expliquez pourquoi une encre offset est « pâteuse » et une encre jet d'encre « liquide ». Quel ingrédient fait la différence ?</p><textarea data-k="q1" id="q1"></textarea></div>
+</section>
+
+<!-- 02 VISCOSITE -->
+<section class="block" id="viscosite">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--c)"></span><span class="eyebrow">02 · Rhéologie</span></div><h2>La viscosité choisit la technique d'impression</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p><b>En cours de physique</b> : la viscosité η mesure la résistance d'un fluide à l'écoulement. Elle s'exprime en pascal-seconde (Pa·s). L'eau vaut 0,001 Pa·s, le miel environ 10 Pa·s.</p>
+      <p><b>En agence</b> : chaque procédé fonctionne dans une fenêtre de viscosité. Le support et le volume souhaités par le client orientent vers un procédé, qui impose son encre.</p>
+      <ul>
+        <li>Carton épais, tissu, objet, aplats très couvrants : <b>sérigraphie</b>, encre qui « a du corps ».</li>
+        <li>Millions de magazines ou catalogues : <b>héliogravure</b>, encre ultra-fluide, presse très rapide.</li>
+        <li>Emballages souples, étiquettes, cartons ondulés : <b>flexographie</b>, encre fluide.</li>
+        <li>Livres, brochures, affiches en moyennes et grandes quantités : <b>offset</b>, encre pâteuse.</li>
+      </ul>
+      <p class="note"><b>Notion ajoutée : la thixotropie.</b> Une encre offset ou sérigraphique se fluidifie quand on la remue ou qu'on la presse (raclette, rouleaux), puis se raffermit au repos. C'est ce qui lui permet de passer à travers l'écran ou de s'étaler, puis de ne plus couler une fois déposée. Le ketchup fait la même chose.</p>
+      <p class="note m"><b>Risque pro.</b> Avec une encre épaisse (sérigraphie, Riso) et un écran à mailles grossières, les détails trop fins (filets sous 0,25 pt, corps de texte très petit, trames fines) se bouchent ou disparaissent. Il faut adapter le fichier au procédé.</p>
+    </div>
+    <div class="lab">
+      <div class="pair"><span class="label">Manipulation : faites varier la viscosité</span></div>
+      <canvas id="cvVisc" width="560" height="300" aria-label="Animation : une goutte d'encre coule sur un plan incliné à une vitesse qui dépend de la viscosité"></canvas>
+      <label for="viscR">Viscosité η (échelle logarithmique)</label>
+      <input type="range" id="viscR" min="-3" max="2.5" step="0.01" value="-1">
+      <div class="row" style="justify-content:space-between"><span class="readout" id="viscVal"></span><span class="readout" id="viscTech"></span></div>
+    </div>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Procédé</th><th>Viscosité typique</th><th>Comparable à</th><th>Usage graphique</th></tr></thead>
+    <tbody>
+      <tr><td>Jet d'encre</td><td class="num">0,002 – 0,03 Pa·s</td><td>eau, lait</td><td>Épreuves, petites séries, grand format</td></tr>
+      <tr><td>Héliogravure</td><td class="num">0,02 – 0,2 Pa·s</td><td>huile d'olive</td><td>Magazines et catalogues à très fort tirage, emballages</td></tr>
+      <tr><td>Flexographie</td><td class="num">0,05 – 0,5 Pa·s</td><td>sirop léger</td><td>Emballages, étiquettes, sacs, carton ondulé</td></tr>
+      <tr><td>Sérigraphie</td><td class="num">0,5 – 20 Pa·s</td><td>crème, miel</td><td>Textile, objets, affiches d'art, encres à effet</td></tr>
+      <tr><td>Offset / typographie</td><td class="num">20 – 100 Pa·s</td><td>beurre de cacahuète</td><td>Édition, presse, affiches, papeterie</td></tr>
+    </tbody>
+  </table></div>
+  <div class="q"><h3><span class="qn">Q2</span>Analyse</h3><p>Une marque de cosmétiques veut 50 tote bags et 2 millions de dépliants. Proposez un procédé pour chacun et justifiez avec la notion de viscosité et une autre contrainte (support, quantité, vitesse).</p><textarea data-k="q2" id="q2"></textarea></div>
+</section>
+
+<!-- 03 SECHAGE -->
+<section class="block" id="sechage">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--m)"></span><span class="eyebrow">03 · Chimie du séchage</span></div><h2>Le séchage fixe vos délais et votre façonnage</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p><b>En cours</b> : l'huile de lin contient des acides gras insaturés (doubles liaisons C=C). Au contact du dioxygène de l'air, ils s'oxydent et se lient entre eux : c'est la <b>réticulation</b>, qui transforme un liquide en un réseau solide.</p>
+      <p><b>En agence</b> : un catalogue en offset conventionnel « prend » en quelques minutes, mais l'encre n'est sèche à cœur qu'après 24 à 48 h. Couper, plier ou relier trop tôt provoque le <b>maculage</b> (transfert d'encre sur la feuille d'en face). Les imprimeurs projettent souvent une fine poudre anti-maculage entre les feuilles.</p>
+      <p><b>Offset UV</b> : l'encre contient des monomères et oligomères (acrylates) et des <b>photo-amorceurs</b>. Sous la lampe UV, ces derniers produisent des radicaux qui déclenchent une polymérisation en moins d'une seconde. La feuille sort sèche, on façonne tout de suite ; l'encre est plus chère et le désencrage au recyclage plus difficile.</p>
+      <p class="note y"><b>Notion ajoutée : il existe quatre grands modes de séchage</b>, souvent combinés. Testez-les dans l'animation : oxydation, évaporation du solvant, absorption dans le papier, polymérisation UV. En sérigraphie textile, l'encre plastisol sèche par un cinquième mode : elle gélifie à chaud, vers 150 – 160 °C.</p>
+    </div>
+    <div class="lab">
+      <div class="pair"><span class="label">Manipulation : choisissez un mode de séchage</span></div>
+      <div class="row" id="dryBtns">
+        <button class="seg" aria-pressed="true" data-dry="ox">Oxydation</button>
+        <button class="seg" aria-pressed="false" data-dry="evap">Évaporation</button>
+        <button class="seg" aria-pressed="false" data-dry="abs">Absorption</button>
+        <button class="seg" aria-pressed="false" data-dry="uv">UV</button>
+      </div>
+      <canvas id="cvDry" width="560" height="300" aria-label="Animation moléculaire du séchage de l'encre sur un papier"></canvas>
+      <div class="row" style="justify-content:space-between"><span class="readout" id="dryClock"></span><span class="readout" id="dryState"></span></div>
+      <button id="dryRestart">Relancer</button>
+      <p style="font-size:14px;color:var(--muted)" id="dryTxt"></p>
+    </div>
+  </div>
+  <div class="q"><h3><span class="qn">Q3</span>Analyse</h3><p>Votre client veut ses 3 000 brochures piquées pour un salon dans 24 h. Quelles options d'impression lui proposez-vous, avec quelles conséquences (délai, coût, recyclabilité) ? Appuyez-vous sur les modes de séchage.</p><textarea data-k="q3" id="q3"></textarea></div>
+</section>
+
+<!-- 04 PIGMENT -->
+<section class="block" id="pigment">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--y)"></span><span class="eyebrow">04 · Matière colorante</span></div><h2>Pigment ou colorant : la durée de vie du design</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p><b>En cours</b> : un <b>pigment</b> est une particule solide, insoluble dans son milieu, dispersée dans le liant. Un <b>colorant</b> est une molécule dissoute. Le colorant offre des couleurs vives et transparentes, mais chaque molécule est exposée seule à la lumière : les photons UV cassent ses liaisons (<b>photodégradation</b>). Dans un grain de pigment, seules les molécules de surface sont exposées, le cœur protège la couleur.</p>
+      <p><b>En agence</b> : pour une affiche d'abribus exposée trois mois, une enseigne ou un véhicule, le cahier des charges doit exiger des encres pigmentaires à haute tenue lumière. Sinon les bleus et magentas pâlissent en quelques semaines ; le jaune est souvent le premier à virer.</p>
+      <p class="note"><b>Notion ajoutée : l'échelle de laine bleue (Blue Wool, ISO 105-B02 / ISO 12040).</b> On expose huit étalons de laine teinte à côté de l'échantillon. Une note de 1 signifie une très faible tenue, 8 une tenue excellente ; chaque cran correspond environ à un doublement de la durée d'exposition supportée. Pour l'extérieur, on vise 7 ou 8.</p>
+      <p class="note m"><b>Notion ajoutée : le métamérisme.</b> Deux encres de formules différentes peuvent paraître identiques sous une lumière et différentes sous une autre (néon de magasin, lumière du jour). C'est pour cela que les épreuves de couleur se valident sous un éclairage normalisé D50.</p>
+    </div>
+    <div class="lab">
+      <div class="pair"><span class="label">Manipulation : exposez l'affiche au soleil</span></div>
+      <canvas id="cvPig" width="560" height="300" aria-label="Comparaison entre une affiche imprimée avec pigments et une affiche imprimée avec colorants, qui pâlit avec l'exposition"></canvas>
+      <label for="sunR">Durée d'exposition en extérieur</label>
+      <input type="range" id="sunR" min="0" max="16" step="0.1" value="0">
+      <span class="readout" id="sunVal"></span>
+    </div>
+  </div>
+  <div class="q"><h3><span class="qn">Q4</span>Analyse</h3><p>Rédigez la ligne du cahier des charges qui concerne les encres pour une signalétique extérieure de musée, et expliquez au client, en deux phrases sans jargon, pourquoi elle coûte plus cher.</p><textarea data-k="q4" id="q4"></textarea></div>
+</section>
+
+<!-- 05 MOUILLAGE -->
+<section class="block" id="mouillage">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--c)"></span><span class="eyebrow">05 · Interfaces</span></div><h2>Tension superficielle et nouveaux supports</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p><b>En cours</b> : une goutte posée sur un solide forme un <b>angle de contact θ</b>. Il résulte de l'équilibre entre trois tensions, décrit par la relation de Young : γ<sub>S</sub> = γ<sub>SL</sub> + γ<sub>L</sub>·cos θ. Plus θ est petit, mieux le liquide s'étale : on dit qu'il <b>mouille</b> le support.</p>
+      <p><b>En agence</b> : les plastiques comme le polyéthylène (PE) et le polypropylène (PP) ont une énergie de surface faible (environ 30 mN/m). L'encre y <b>perle</b> comme l'eau sur une poêle anti-adhésive, puis s'arrache au moindre frottement. Les emballages éco-conçus (PLA, films à base d'amidon ou d'algues) posent les mêmes questions.</p>
+      <p><b>Règle d'atelier</b> : l'énergie de surface du support doit dépasser d'environ 10 mN/m la tension superficielle de l'encre. L'imprimeur la vérifie avec des <b>encres ou stylos-test « dyne »</b>.</p>
+      <p class="note"><b>Le traitement Corona</b> : une décharge électrique à haute tension ionise l'air au-dessus du film. Elle crée en surface des groupes polaires oxygénés, ce qui augmente l'énergie de surface (de 30 à 38 – 42 mN/m pour du PE). L'effet s'estompe avec le temps de stockage, d'où un traitement juste avant impression. On peut aussi utiliser un primaire d'accroche ou un traitement plasma ou flamme.</p>
+    </div>
+    <div class="lab">
+      <div class="pair"><span class="label">Manipulation : une goutte d'encre sur un support</span></div>
+      <canvas id="cvDrop" width="560" height="260" aria-label="Profil d'une goutte d'encre sur un support, dont l'angle de contact varie"></canvas>
+      <div class="row">
+        <label for="supSel" style="flex:1 1 200px">Support
+          <select id="supSel">
+            <option value="31">Polyéthylène PE (31 mN/m)</option>
+            <option value="30">Polypropylène PP (30 mN/m)</option>
+            <option value="40">PLA compostable (≈ 40 mN/m)</option>
+            <option value="43">PET (≈ 43 mN/m)</option>
+            <option value="18">PTFE, type Téflon (18 mN/m)</option>
+            <option value="50">Papier couché (> 45 mN/m)</option>
+          </select></label>
+        <label for="inkSel" style="flex:1 1 200px">Encre
+          <select id="inkSel">
+            <option value="36">À l'eau (≈ 36 mN/m)</option>
+            <option value="27">À solvant (≈ 27 mN/m)</option>
+            <option value="33">UV (≈ 33 mN/m)</option>
+          </select></label>
+      </div>
+      <div class="row"><button id="corona" aria-pressed="false" class="seg">Appliquer un traitement Corona</button></div>
+      <div class="row" style="justify-content:space-between"><span class="readout" id="dropVal"></span><span class="readout" id="dropVerdict"></span></div>
+      <p style="font-size:13px;color:var(--muted)">Modèle simplifié : l'angle dépend de l'écart entre l'énergie du support et la tension de l'encre. Les valeurs sont des ordres de grandeur.</p>
+    </div>
+  </div>
+  <div class="q"><h3><span class="qn">Q5</span>Analyse</h3><p>Un client veut un sachet de thé en film compostable avec un grand aplat de couleur. Quels risques d'impression signalez-vous dans le brief, et quelles questions posez-vous à l'imprimeur ?</p><textarea data-k="q5" id="q5"></textarea></div>
+</section>
+
+<!-- 06 COULEUR -->
+<section class="block" id="couleur">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--m)"></span><span class="eyebrow">06 · Notions ajoutées</span></div><h2>Couleur, papier et engraissement du point</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p><b>Synthèse soustractive.</b> Une encre est un filtre : elle absorbe une partie de la lumière et laisse le papier renvoyer le reste. Le cyan absorbe le rouge, le magenta absorbe le vert, le jaune absorbe le bleu. Superposés, ils assombrissent. Le noir (K) est ajouté pour la densité, la netteté du texte et l'économie d'encre.</p>
+      <p><b>Tons directs.</b> Certaines couleurs (orange vif, fluo, métallisé, certains bleus de marque) sont hors de portée du CMJN : on les imprime avec une encre spéciale mélangée à l'avance, référencée dans un nuancier (Pantone, par exemple).</p>
+      <p><b>Engraissement du point (TVI).</b> L'encre s'étale et pénètre dans le papier : un point de trame de 50 % dans le fichier peut couvrir 62 à 75 % sur papier. L'effet est plus fort sur papier non couché, encore plus sur papier journal. C'est pourquoi on choisit un profil ICC adapté au papier : FOGRA39 ou FOGRA51 pour le couché, FOGRA52 pour le non couché.</p>
+      <p><b>Taux d'encrage total (TAC).</b> La somme C+M+J+N d'un point ne doit pas dépasser environ 300 – 330 % sur couché et 260 – 300 % sur non couché, sinon l'encre ne sèche pas et macule.</p>
+    </div>
+    <div class="lab">
+      <div class="pair"><span class="label">Manipulation 1 : superposez les encres</span></div>
+      <div class="cmyk"><svg viewBox="0 0 300 260" role="img" aria-label="Trois disques cyan, magenta et jaune qui se superposent en mode soustractif">
+        <rect x="0" y="0" width="300" height="260" fill="#FFFFFF"/>
+        <g style="mix-blend-mode:multiply" id="cmykG">
+          <circle id="dc" cx="115" cy="100" r="72" fill="#00A3E0" style="mix-blend-mode:multiply"/>
+          <circle id="dm" cx="185" cy="100" r="72" fill="#E6007E" style="mix-blend-mode:multiply"/>
+          <circle id="dy" cx="150" cy="160" r="72" fill="#FFE600" style="mix-blend-mode:multiply"/>
+        </g></svg></div>
+      <div class="row"><button class="seg" aria-pressed="true" data-ink="dc">Cyan</button><button class="seg" aria-pressed="true" data-ink="dm">Magenta</button><button class="seg" aria-pressed="true" data-ink="dy">Jaune</button></div>
+      <div class="pair" style="margin-top:8px"><span class="label">Manipulation 2 : imprimez une trame</span></div>
+      <canvas id="cvDot" width="560" height="240" aria-label="Points de trame dans le fichier et sur le papier imprimé"></canvas>
+      <label for="dotR">Valeur de trame dans le fichier</label>
+      <input type="range" id="dotR" min="5" max="95" step="1" value="50">
+      <label for="papSel">Papier
+        <select id="papSel"><option value="12">Couché brillant</option><option value="18">Non couché (offset)</option><option value="26">Papier journal</option></select></label>
+      <span class="readout" id="dotVal"></span>
+    </div>
+  </div>
+  <div class="q"><h3><span class="qn">Q6</span>Analyse</h3><p>Une photo sombre et contrastée a été validée à l'écran. Elle sera imprimée sur un papier recyclé non couché. Que risque-t-il de se passer et comment préparer le fichier ?</p><textarea data-k="q6" id="q6"></textarea></div>
+</section>
+
+<!-- 07 SPECIALES -->
+<section class="block" id="speciales">
+  <div class="sec-head"><div class="tag"><span class="swatch" style="background:var(--y)"></span><span class="eyebrow">07 · Notions ajoutées</span></div><h2>Encres spéciales, encres connectées, encres responsables</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p><b>Encres conductrices.</b> Chargées de particules d'argent, de cuivre, de carbone ou de polymères conducteurs, elles impriment des circuits : antennes NFC et RFID dans des étiquettes ou des emballages, boutons tactiles sur papier, capteurs. C'est l'électronique imprimée, à la frontière entre graphisme et objet connecté.</p>
+      <p><b>Encres à effet.</b> Thermochromiques (leuco-colorants qui changent de couleur avec la température), photochromiques (réagissent aux UV), phosphorescentes, fluorescentes sous lumière noire (sécurité des billets et des billets de concert), métalliques (paillettes d'aluminium), nacrées (mica enrobé de dioxyde de titane), à gratter.</p>
+      <p><b>Opacité et blanc de soutien.</b> Les encres CMJN sont transparentes : sur kraft, papier coloré ou film transparent, la couleur se mélange au fond. On imprime d'abord un blanc couvrant (pigment de dioxyde de titane), dit blanc de soutien.</p>
+    </div>
+    <div class="prose">
+      <p><b>Réglementation et éco-conception.</b> En France, la loi anti-gaspillage pour une économie circulaire (AGEC, 2020) interdit les huiles minérales dans les encres des emballages et des imprimés destinés au public depuis le 1<sup>er</sup> janvier 2023 ; le seuil de tolérance des hydrocarbures aromatiques (MOAH) est passé de 1 % à 0,1 % au 1<sup>er</sup> janvier 2025. Ces huiles migrent vers les aliments et gênent le recyclage. On les remplace par des huiles végétales (colza, soja, lin).</p>
+      <p><b>Recyclabilité.</b> Un papier imprimé est recyclé après <b>désencrage</b> (les particules d'encre sont décollées puis éliminées par flottation). Certaines encres UV ou jet d'encre aqueux se désencrent mal. Le label <b>Imprim'Vert</b> signale un imprimeur qui gère ses déchets dangereux et n'utilise plus de produits toxiques étiquetés.</p>
+      <p class="note k"><b>Pour le graphiste</b> : limiter les aplats et le taux d'encrage, éviter les pelliculages plastiques, choisir un support mono-matériau, indiquer au cahier des charges des encres végétales et un imprimeur labellisé.</p>
+    </div>
+  </div>
+  <div class="q"><h3><span class="qn">Q7</span>Analyse</h3><p>Imaginez une affiche « connectée » ou interactive qui utiliserait une encre spéciale de cette fiche. Décrivez l'usage, l'encre, et une contrainte physique ou chimique à anticiper.</p><textarea data-k="q7" id="q7"></textarea></div>
+</section>
+
+<!-- 08 QUIZ -->
+<section class="block" id="quiz">
+  <div class="sec-head"><div class="tag"><span class="eyebrow">08 · Vérifier ses connaissances</span></div><h2>Quiz : 12 questions</h2></div>
+  <p class="lead" style="margin-top:0">Répondez à toutes les questions, puis cliquez sur « Corriger ». Le score apparaîtra dans votre PDF. Vous pouvez corriger vos erreurs après correction, mais le premier score reste enregistré.</p>
+  <form class="quiz" id="quizForm"></form>
+  <div class="row" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="primary" id="quizCheck" type="button">Corriger</button><span class="readout" id="quizScore"></span></div>
+</section>
+
+<!-- 09 RECHERCHE -->
+<section class="block" id="recherche">
+  <div class="sec-head"><div class="tag"><span class="eyebrow">09 · Recherche documentaire</span></div><h2>Trouver, évaluer et citer trois sources</h2></div>
+  <div class="grid2">
+    <div class="prose">
+      <p>Choisissez <b>une notion</b> de ce document à approfondir (par exemple : encres végétales, encres conductrices, traitement Corona, encres UV et recyclage, tenue lumière, histoire de l'encre). Trouvez au moins <b>trois sources de natures différentes</b>.</p>
+      <ul>
+        <li>une source institutionnelle ou scientifique (ministère, ADEME, CNRS, BnF, revue scientifique, université) ;</li>
+        <li>une source professionnelle (fabricant d'encres, imprimeur, syndicat de l'impression, fiche technique) ;</li>
+        <li>une source au choix (article de presse spécialisée, livre, vidéo d'un professionnel identifié).</li>
+      </ul>
+    </div>
+    <div class="note k" style="display:grid;gap:8px">
+      <b>Grille de fiabilité : quatre questions</b>
+      <span><b>Qui ?</b> L'auteur ou l'organisme est-il identifié et compétent ?</span>
+      <span><b>Quand ?</b> La date est-elle indiquée et récente pour ce sujet ?</span>
+      <span><b>Pourquoi ?</b> Informer, vendre, convaincre ? Une fiche de fabricant est précise mais commerciale.</span>
+      <span><b>Vérifiable ?</b> L'information est-elle confirmée par une autre source indépendante ?</span>
+      <b style="margin-top:6px">Format de citation</b>
+      <span style="font-family:var(--f-mono);font-size:13px">AUTEUR ou ORGANISME. <i>Titre</i>. Site ou éditeur, date de publication. URL (consulté le JJ/MM/AAAA).</span>
+    </div>
+  </div>
+  <label class="field" style="max-width:620px"><span>Notion approfondie</span><input type="text" id="notion" data-k="notion" placeholder="ex. Les encres conductrices dans l'emballage"></label>
+  <div class="sources" id="sources"></div>
+  <div><button type="button" id="addSrc">Ajouter une source</button></div>
+  <div class="q"><h3><span class="qn">Q8</span>Croisement des sources</h3><p>Sur quel point vos sources sont-elles d'accord ? Sur quel point divergent-elles, ou l'une apporte-t-elle une information que les autres n'ont pas ? Laquelle jugez-vous la plus fiable, et pourquoi ?</p><textarea data-k="q8" id="q8"></textarea></div>
+</section>
+
+<!-- 10 CAS -->
+<section class="block" id="cas">
+  <div class="sec-head"><div class="tag"><span class="eyebrow">10 · Analyse appliquée</span></div><h2>Cas client : rédigez la recommandation technique</h2></div>
+  <p class="lead" style="margin-top:0">Choisissez un brief. Vous êtes le graphiste qui conseille le client et prépare le cahier des charges pour l'imprimeur. Mobilisez <b>au moins trois notions</b> du document.</p>
+  <div class="cases" id="cases">
+    <label class="case"><input type="radio" name="case" value="A" data-k="case" id="caseA"><b>A · Festival d'été</b><p>Affiches 120 × 176 cm pour abribus, exposées de mai à août, plus 40 t-shirts pour les bénévoles.</p></label>
+    <label class="case"><input type="radio" name="case" value="B" data-k="case" id="caseB"><b>B · Chocolat bio</b><p>Emballage en film compostable, aplat marron foncé, logo or, une puce NFC renvoyant à la traçabilité du cacao.</p></label>
+    <label class="case"><input type="radio" name="case" value="C" data-k="case" id="caseC"><b>C · Catalogue express</b><p>Catalogue 200 pages, 5 000 exemplaires, papier recyclé non couché, photos sombres, livraison sous 48 h.</p></label>
+    <label class="case"><input type="radio" name="case" value="D" data-k="case" id="caseD"><b>D · Carte interactive</b><p>Carte de visite de musée avec une zone qui change de couleur sous le doigt et un texte visible seulement en lumière UV.</p></label>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th style="width:28%">Rubrique</th><th>Votre recommandation</th></tr></thead>
+    <tbody>
+      <tr><td>Procédé d'impression et pourquoi</td><td><textarea data-k="c_proc" id="c_proc" style="min-height:70px"></textarea></td></tr>
+      <tr><td>Type d'encre (matière colorante, liant, mode de séchage)</td><td><textarea data-k="c_encre" id="c_encre" style="min-height:70px"></textarea></td></tr>
+      <tr><td>Support et préparation (traitement, profil, blanc de soutien…)</td><td><textarea data-k="c_sup" id="c_sup" style="min-height:70px"></textarea></td></tr>
+      <tr><td>Risques identifiés et parades</td><td><textarea data-k="c_risk" id="c_risk" style="min-height:70px"></textarea></td></tr>
+      <tr><td>Impact environnemental et alternative</td><td><textarea data-k="c_env" id="c_env" style="min-height:70px"></textarea></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 11 SYNTHESE -->
+<section class="block" id="synthese">
+  <div class="sec-head"><div class="tag"><span class="eyebrow">11 · Synthèse</span></div><h2>Ce que l'encre impose au graphiste</h2></div>
+  <div class="grid2">
+    <div class="q">
+      <h3><span class="qn">S1</span>Mes définitions</h3>
+      <p class="hint">En une phrase chacune, avec vos propres mots.</p>
+      <label class="field"><span>Viscosité</span><input type="text" data-k="d_visc" id="d_visc"></label>
+      <label class="field"><span>Réticulation</span><input type="text" data-k="d_ret" id="d_ret"></label>
+      <label class="field"><span>Pigment</span><input type="text" data-k="d_pig" id="d_pig"></label>
+      <label class="field"><span>Mouillabilité</span><input type="text" data-k="d_mou" id="d_mou"></label>
+      <label class="field"><span>Engraissement du point</span><input type="text" data-k="d_eng" id="d_eng"></label>
+    </div>
+    <div class="q">
+      <h3><span class="qn">S2</span>Texte de synthèse (150 à 250 mots)</h3>
+      <p class="hint">Répondez à la question : « En quoi la connaissance physico-chimique des encres change-t-elle la façon de concevoir un projet graphique ? » Organisez votre texte en idées, appuyez-vous sur deux exemples précis et citez au moins une de vos sources entre parenthèses.</p>
+      <textarea data-k="synth" id="synth" style="min-height:260px"></textarea>
+      <div class="count" id="synthCount">0 mot</div>
+    </div>
+  </div>
+  <div class="q">
+    <h3><span class="qn">S3</span>Auto-évaluation</h3>
+    <div class="selfeval" id="selfeval"></div>
+  </div>
+</section>
+
+<!-- 12 EXPORT -->
+<section class="block" id="export">
+  <div class="final">
+    <span class="eyebrow" style="color:color-mix(in srgb,var(--paper) 70%,transparent)">12 · Rendu</span>
+    <h2>Générer mon dossier PDF</h2>
+    <ul class="checklist" id="checklist"></ul>
+    <p style="font-size:15px">Le bouton ouvre la fenêtre d'impression. Choisissez <b>« Enregistrer au format PDF »</b> (ou « Microsoft Print to PDF ») comme imprimante. Le nom du fichier est proposé automatiquement. Déposez ensuite le PDF là où votre enseignant l'indique.</p>
+    <div class="row">
+      <button id="makePdf">Générer mon dossier PDF</button>
+      <button class="ghost" id="saveJson">Télécharger ma sauvegarde</button>
+      <button class="ghost" id="loadJsonBtn">Reprendre une sauvegarde</button>
+      <input type="file" id="loadJson" accept="application/json,.json" hidden>
+      <button class="ghost" id="reset">Tout effacer</button>
+    </div>
+    <p id="resetConfirm" hidden style="font-size:14px">Toutes vos réponses seront effacées de ce navigateur. <button id="resetYes" style="padding:4px 10px">Oui, tout effacer</button> <button id="resetNo" class="ghost" style="padding:4px 10px">Annuler</button></p>
+  </div>
+</section>
+
+</main>
+
+<footer><div class="wrap">Support pédagogique · ESAAT · DN MADe Graphisme · Physique-chimie appliquée aux encres. Valeurs numériques indicatives (ordres de grandeur) ; vérifiez-les dans vos sources.</div></footer>
+
+<div id="report"></div>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const KEY="atelier-encres-v1";
+const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+let state={};
+try{state=JSON.parse(localStorage.getItem(KEY)||"{}")||{}}catch(e){state={}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){} updateNav();updateChecklist();}
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2600)}
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function words(s){return (s||"").trim().split(/\s+/).filter(Boolean).length}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+/* ---------- champs simples ---------- */
+if(!state.date){const d=new Date();state.date=d.toLocaleDateString("fr-FR")}
+function bindFields(){
+  $$("[data-k]").forEach(el=>{
+    const k=el.dataset.k;
+    if(el.type==="radio"){el.checked=state[k]===el.value;el.addEventListener("change",()=>{state[k]=el.value;save()})}
+    else{el.value=state[k]||"";el.addEventListener("input",()=>{state[k]=el.value;if(k==="synth")countSynth();save()})}
+  });
+}
+
+/* ---------- 01 recette ---------- */
+const recipes={
+  offset:{parts:[["Pigment",20,"--c"],["Liant (résines, huile)",45,"--m"],["Huiles / diluant",28,"--y"],["Additifs",7,"--muted"]],txt:"Offset : beaucoup de liant et de pigment, peu de diluant → pâte épaisse."},
+  jet:{parts:[["Colorant / pigment",4,"--c"],["Liant / polymère",3,"--m"],["Eau + co-solvants",90,"--y"],["Additifs",3,"--muted"]],txt:"Jet d'encre : ~90 % d'eau et de co-solvants → liquide très fluide."},
+  flexo:{parts:[["Pigment",15,"--c"],["Résine acrylique",30,"--m"],["Eau + alcool",50,"--y"],["Additifs",5,"--muted"]],txt:"Flexo à l'eau : moitié solvant → fluide, sèche par évaporation."}
+};
+let curRecipe="offset";
+function drawRecipe(){
+  const cv=$("#cvRecipe"),g=cv.getContext("2d"),W=cv.width,H=cv.height;g.clearRect(0,0,W,H);
+  const r=recipes[curRecipe];let y=18;g.font="14px "+css("--f-body");
+  r.parts.forEach(([name,v,col])=>{
+    g.fillStyle=css("--ink");g.textBaseline="middle";g.fillText(name,12,y+16);
+    const x0=200,w=(W-x0-60)*v/100;g.fillStyle=css(col);g.fillRect(x0,y+4,Math.max(2,w),24);
+    g.fillStyle=css("--ink");g.font="600 13px "+css("--f-mono");g.fillText(v+" %",x0+w+8,y+16);g.font="14px "+css("--f-body");y+=52;
+  });
+  $("#recipeTxt").textContent=r.txt;
+}
+$$("[data-recipe]").forEach(b=>b.addEventListener("click",()=>{curRecipe=b.dataset.recipe;$$("[data-recipe]").forEach(x=>x.setAttribute("aria-pressed",x===b));drawRecipe()}));
+
+/* ---------- 02 viscosité ---------- */
+const techs=[["Jet d'encre",0.002,0.03],["Héliogravure",0.02,0.2],["Flexographie",0.05,0.5],["Sérigraphie",0.5,20],["Offset",20,100]];
+const refs=[["eau",0.001],["huile",0.08],["miel",10],["beurre de cacahuète",250]];
+let viscPos=0,lastT=0;
+function viscEta(){return Math.pow(10,+$("#viscR").value)}
+function fmtEta(e){return e<0.1?(e*1000).toFixed(e<0.01?1:0)+" mPa·s":e.toLocaleString("fr-FR",{maximumFractionDigits:e<10?2:0})+" Pa·s"}
+function viscLabels(){
+  const e=viscEta();$("#viscVal").textContent="η = "+fmtEta(e);
+  const t=techs.filter(t=>e>=t[1]&&e<=t[2]).map(t=>t[0]);
+  $("#viscTech").textContent=t.length?t.join(" · "):"hors des fenêtres d'impression";
+}
+function drawVisc(ts){
+  const cv=$("#cvVisc"),g=cv.getContext("2d"),W=cv.width,H=cv.height;
+  const dt=Math.min(50,ts-(lastT||ts));lastT=ts;
+  const e=viscEta();const speed=reduce?0:0.42/Math.pow(e/0.001,0.33);
+  viscPos+=speed*dt/16; if(viscPos>1.15)viscPos=-0.05;
+  g.clearRect(0,0,W,H);
+  // plan incliné
+  const x0=30,y0=40,x1=W-30,y1=170;
+  g.strokeStyle=css("--ink");g.lineWidth=3;g.beginPath();g.moveTo(x0,y0);g.lineTo(x1,y1);g.stroke();
+  // trace + goutte
+  const p=Math.max(0,Math.min(1,viscPos));const px=x0+(x1-x0)*p,py=y0+(y1-y0)*p;
+  const ang=Math.atan2(y1-y0,x1-x0);
+  g.save();g.translate(px,py);g.rotate(ang);
+  const stretch=1+Math.max(0,1.6-Math.log10(e/0.001)*0.35);
+  g.fillStyle=css("--c");g.globalAlpha=.35;g.fillRect(-(px-x0)/Math.cos(ang),-4,(px-x0)/Math.cos(ang),4);g.globalAlpha=1;
+  g.beginPath();g.ellipse(0,-12,14*stretch,12/Math.sqrt(stretch),0,0,Math.PI*2);g.fill();g.restore();
+  // échelle log
+  const sx=v=>30+(Math.log10(v)+3)/5.5*(W-60);const by=228;
+  g.font="11px "+css("--f-mono");g.textBaseline="alphabetic";
+  techs.forEach((t,i)=>{const a=sx(t[1]),b=sx(t[2]);const yy=by+(i%2)*14-7;g.fillStyle=css(["--c","--m","--y","--warn","--ink"][i]);g.globalAlpha=.85;g.fillRect(a,yy,b-a,8);g.globalAlpha=1;
+    g.fillStyle=css("--ink");g.fillText(t[0],Math.min(a,W-100),i%2?yy+22:yy-5);});
+  g.strokeStyle=css("--muted");g.lineWidth=1;g.beginPath();g.moveTo(30,by+26);g.lineTo(W-30,by+26);g.stroke();
+  [0.001,0.01,0.1,1,10,100].forEach(v=>{const x=sx(v);g.beginPath();g.moveTo(x,by+22);g.lineTo(x,by+30);g.stroke();g.fillStyle=css("--muted");g.fillText(v>=1?v+"":v.toString().replace(".",","),x-10,by+44)});
+  g.fillText("Pa·s",W-56,by+44);
+  refs.forEach(([n,v],i)=>{const x=sx(v);g.fillStyle=css("--muted");g.fillText("▲ "+n,Math.min(x-4,W-140),by+58+(i===3?12:0))});
+  const mx=sx(e);g.strokeStyle=css("--bad");g.lineWidth=2;g.beginPath();g.moveTo(mx,by-18);g.lineTo(mx,by+32);g.stroke();
+  requestAnimationFrame(drawVisc);
+}
+$("#viscR").addEventListener("input",viscLabels);
+
+/* ---------- 03 séchage ---------- */
+const dryInfo={
+  ox:{dur:48,label:"h",txt:"Le dioxygène (points rouges) entre dans le film ; les chaînes d'huile se relient une à une (traits). Sec au toucher en quelques heures, sec à cœur en 24 – 48 h.",touch:0.3,core:0.95},
+  evap:{dur:3,label:"s",txt:"Flexo, héliogravure : le solvant (points bleus) s'évapore, souvent aidé par de l'air chaud. Seuls restent pigment et résine. Rapide, mais il faut capter les vapeurs (COV) si le solvant n'est pas l'eau.",touch:0.6,core:0.9},
+  abs:{dur:60,label:"min",txt:"Presse quotidienne (coldset) : la partie liquide de l'encre pénètre entre les fibres du papier, le pigment reste en surface. L'encre ne durcit jamais vraiment : elle tache encore les doigts.",touch:0.7,core:2},
+  uv:{dur:1,label:"s",txt:"Encre UV : la lampe active les photo-amorceurs, la polymérisation relie tout le film en une fraction de seconde. Façonnage immédiat.",touch:0.35,core:0.4}
+};
+let dryMode="ox",dryT0=0,dryParts=[];
+function initDry(){
+  dryParts=[];for(let i=0;i<46;i++)dryParts.push({x:40+Math.random()*480,y:120+Math.random()*80,vx:0,vy:0,kind:i<18?"pig":"liq",gone:false,link:Math.random()});
+  dryT0=performance.now();
+}
+function drawDry(ts){
+  const cv=$("#cvDry"),g=cv.getContext("2d"),W=cv.width,H=cv.height;const info=dryInfo[dryMode];
+  let p=reduce?1:Math.min(1,(ts-dryT0)/7000);
+  g.clearRect(0,0,W,H);
+  // papier (fibres)
+  g.fillStyle=css("--sheet");g.fillRect(0,210,W,90);
+  g.strokeStyle=css("--rule");g.lineWidth=3;for(let i=0;i<14;i++){g.beginPath();g.moveTo(0,222+i*6);g.bezierCurveTo(W*.3,215+((i*37)%30),W*.6,230+((i*53)%20),W,220+i*6);g.stroke()}
+  g.fillStyle=css("--muted");g.font="11px "+css("--f-mono");g.fillText("PAPIER",8,296);g.fillText("FILM D'ENCRE",8,112);
+  // UV lamp
+  if(dryMode==="uv"){const lx=-60+p*(W+120);g.fillStyle="rgba(140,80,255,.18)";g.fillRect(lx-50,0,100,210);g.fillStyle="#7A4DFF";g.fillRect(lx-40,8,80,14);}
+  // links (réticulation)
+  const linkLevel=dryMode==="ox"?p:dryMode==="uv"?(p>0.3?1:0):dryMode==="evap"?p*0.5:0;
+  const liq=dryParts.filter(q=>q.kind==="liq");
+  g.strokeStyle=css("--m");g.lineWidth=1.6;
+  for(let i=0;i<dryParts.length;i++)for(let j=i+1;j<dryParts.length;j++){const a=dryParts[i],b=dryParts[j];if(a.gone||b.gone)continue;const d=Math.hypot(a.x-b.x,a.y-b.y);if(d<52&&(a.link+b.link)/2<linkLevel){g.beginPath();g.moveTo(a.x,a.y);g.lineTo(b.x,b.y);g.stroke()}}
+  // O2 particles
+  if(dryMode==="ox"&&p<1){g.fillStyle=css("--bad");for(let i=0;i<14;i++){const yy=((ts/20+i*41)%140)-10;const xx=(i*83+ts/50)%W;if(yy<200){g.beginPath();g.arc(xx,yy,3,0,7);g.fill()}}}
+  dryParts.forEach((q,i)=>{
+    if(q.kind==="liq"){
+      if(dryMode==="evap"){q.y0=q.y0||q.y;q.y=q.y0-p*(q.link>0.3?260:0);}
+      else if(dryMode==="abs"){q.y0=q.y0||q.y;q.y=q.y0+p*(q.link>0.15?90:0);}
+      else{q.y0=q.y0||q.y;q.y=q.y0;}
+    }
+    const jitter=(1-Math.max(linkLevel,p*0.7))*1.5;
+    const x=q.x+Math.sin(ts/200+i)*jitter,y=q.y+Math.cos(ts/230+i)*jitter;
+    if(q.kind==="pig"){g.fillStyle=css("--ink");g.fillRect(x-4,y-4,8,8)}
+    else{g.fillStyle=dryMode==="evap"||dryMode==="abs"?css("--c"):css("--y");g.beginPath();g.arc(x,y,3.5,0,7);g.fill()}
+  });
+  const t=p*info.dur;
+  $("#dryClock").textContent="temps simulé : "+(info.label==="s"?t.toFixed(1):Math.round(t))+" "+info.label;
+  const st=p>=info.core?"sec à cœur · façonnage possible":p>=info.touch?"sec au toucher · risque de maculage":"frais";
+  $("#dryState").textContent=st;$("#dryState").style.color=p>=info.core?css("--ok"):p>=info.touch?css("--warn"):css("--bad");
+  requestAnimationFrame(drawDry);
+}
+function setDry(m){dryMode=m;$$("[data-dry]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.dry===m));$("#dryTxt").textContent=dryInfo[m].txt;initDry()}
+$$("[data-dry]").forEach(b=>b.addEventListener("click",()=>setDry(b.dataset.dry)));
+$("#dryRestart").addEventListener("click",initDry);
+
+/* ---------- 04 pigment ---------- */
+function mix(hex,amt){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b=n&255;r=Math.round(r+(255-r)*amt);g=Math.round(g+(255-g)*amt);b=Math.round(b+(255-b)*amt);return `rgb(${r},${g},${b})`}
+function drawPig(){
+  const cv=$("#cvPig"),g=cv.getContext("2d"),W=cv.width,H=cv.height;const w=+$("#sunR").value;
+  g.clearRect(0,0,W,H);
+  const fadeDye=1-Math.exp(-w/3.2),fadePig=1-Math.exp(-w/90);
+  const cols=["#0060A8","#E6007E","#FFD200","#15171F"];
+  [[20,"Encre à colorants",fadeDye,"Laine bleue ≈ 2–3"],[290,"Encre pigmentaire",fadePig,"Laine bleue ≈ 7–8"]].forEach(([x,t,f,bw])=>{
+    g.fillStyle="#FFFFFF";g.fillRect(x,30,250,170);g.strokeStyle=css("--rule");g.strokeRect(x,30,250,170);
+    g.fillStyle=mix(cols[0],f*0.9);g.fillRect(x+16,46,218,60);
+    g.fillStyle=mix(cols[2],f);g.beginPath();g.arc(x+70,150,30,0,7);g.fill();
+    g.fillStyle=mix(cols[1],f*0.95);g.fillRect(x+120,124,100,52);
+    g.fillStyle=mix(cols[3],f*0.4);g.font="700 20px "+css("--f-display");g.fillText("FESTIVAL",x+28,84);
+    g.fillStyle=css("--ink");g.font="600 13px "+css("--f-body");g.fillText(t,x,20);
+    g.font="12px "+css("--f-mono");g.fillStyle=css("--muted");g.fillText(bw+" · perte "+Math.round(f*100)+" %",x,222);
+  });
+  // schéma micro
+  g.font="11px "+css("--f-mono");g.fillStyle=css("--muted");g.fillText("à l'échelle moléculaire :",20,252);
+  for(let i=0;i<22;i++){const x=24+i*11,y=268+(i%3)*6;const broken=(i*7%22)/22<fadeDye;g.fillStyle=broken?css("--rule"):css("--c");g.beginPath();g.arc(x,y,3,0,7);g.fill()}
+  for(let i=0;i<4;i++){const x=300+i*60,y=262;g.fillStyle=css("--c");g.fillRect(x,y,38,26);g.fillStyle=mix("#0060A8",.7);g.fillRect(x,y,38,3+fadePig*20)}
+  $("#sunVal").textContent=w<1?Math.round(w*7)+" jours":w.toFixed(1).replace(".",",")+" semaines";
+}
+$("#sunR").addEventListener("input",drawPig);
+
+/* ---------- 05 goutte ---------- */
+let coronaOn=false;
+function drawDrop(){
+  const cv=$("#cvDrop"),g=cv.getContext("2d"),W=cv.width,H=cv.height;
+  let gs=+$("#supSel").value;const gi=+$("#inkSel").value;
+  const coronable=gs<45;if(coronaOn&&coronable)gs=Math.max(gs,gs<25?gs+6:40);
+  const delta=gs-gi;let th=Math.max(12,Math.min(140,60-4*delta));const thr=th*Math.PI/180;
+  g.clearRect(0,0,W,H);
+  const base=200,cx=W/2;
+  g.fillStyle=coronaOn&&coronable?css("--soft"):css("--sheet");g.fillRect(0,base,W,H-base);g.strokeStyle=css("--ink");g.lineWidth=2;g.beginPath();g.moveTo(0,base);g.lineTo(W,base);g.stroke();
+  if(coronaOn&&coronable){g.fillStyle=css("--accent");g.font="11px "+css("--f-mono");for(let i=0;i<20;i++)g.fillText("–OH",14+i*28,base+18+(i%2)*14)}
+  const A=6200;const R=Math.sqrt(A/(thr-Math.sin(thr)*Math.cos(thr)));const a=R*Math.sin(thr);const cy=base+R*Math.cos(thr);
+  g.fillStyle=css("--c");g.globalAlpha=.85;g.beginPath();g.arc(cx,cy,R,Math.PI*1.5-thr,Math.PI*1.5+thr);g.closePath();g.fill();g.globalAlpha=1;
+  // tangente et angle
+  const ex=cx+a;g.strokeStyle=css("--bad");g.lineWidth=2;g.beginPath();g.moveTo(ex,base);g.lineTo(ex-60*Math.cos(thr),base-60*Math.sin(thr));g.stroke();
+  g.beginPath();g.arc(ex,base,26,Math.PI,Math.PI+thr);g.stroke();
+  g.fillStyle=css("--bad");g.font="600 14px "+css("--f-mono");g.fillText("θ = "+Math.round(th)+"°",Math.min(ex+10,W-90),base-10);
+  $("#dropVal").textContent="support "+gs+" mN/m · encre "+gi+" mN/m · écart "+(delta>0?"+":"")+delta;
+  const v=$("#dropVerdict");
+  if(delta>=10){v.textContent="Bon mouillage, bonne accroche";v.style.color=css("--ok")}
+  else if(delta>=0){v.textContent="Mouillage limite : tester";v.style.color=css("--warn")}
+  else{v.textContent="L'encre perle : traitement nécessaire";v.style.color=css("--bad")}
+  $("#corona").disabled=!coronable;
+}
+["#supSel","#inkSel"].forEach(s=>$(s).addEventListener("change",drawDrop));
+$("#corona").addEventListener("click",()=>{coronaOn=!coronaOn;$("#corona").setAttribute("aria-pressed",coronaOn);drawDrop()});
+
+/* ---------- 06 CMJN + trame ---------- */
+$$("[data-ink]").forEach(b=>b.addEventListener("click",()=>{const on=b.getAttribute("aria-pressed")!=="true";b.setAttribute("aria-pressed",on);$("#"+b.dataset.ink).style.display=on?"":"none"}));
+function drawDot(){
+  const cv=$("#cvDot"),g=cv.getContext("2d"),W=cv.width,H=cv.height;const n=+$("#dotR").value/100;const tvi=+$("#papSel").value/100;
+  const printed=Math.min(1,n+tvi*4*n*(1-n));
+  g.clearRect(0,0,W,H);
+  [[10,"Fichier",n,0],[290,"Imprimé",printed,+$("#papSel").value]].forEach(([x0,lab,c,blur])=>{
+    g.fillStyle="#FFFFFF";g.fillRect(x0,26,260,200);
+    g.save();g.beginPath();g.rect(x0,26,260,200);g.clip();
+    const cell=20;const r=Math.sqrt(c*cell*cell/Math.PI);
+    g.filter=blur?`blur(${blur/14}px)`:"none";g.fillStyle="#15171F";
+    for(let y=26;y<230;y+=cell)for(let x=x0;x<x0+270;x+=cell){g.beginPath();g.arc(x+cell/2,y+cell/2,Math.min(r,cell*.78),0,7);g.fill()}
+    g.restore();g.filter="none";
+    g.fillStyle=css("--ink");g.font="600 13px "+css("--f-body");g.fillText(lab+" : "+Math.round(c*100)+" %",x0,18);
+  });
+  $("#dotVal").textContent="Engraissement : +"+Math.round((printed-n)*100)+" points";
+}
+$("#dotR").addEventListener("input",drawDot);$("#papSel").addEventListener("change",drawDot);
+
+/* ---------- 08 quiz ---------- */
+const Q=[
+ ["Quel procédé utilise l'encre la plus fluide ?",["Offset","Sérigraphie","Héliogravure","Typographie"],2,"L'héliogravure travaille autour de 0,02 – 0,2 Pa·s ; l'offset est 1000 fois plus visqueux."],
+ ["Une encre offset conventionnelle à l'huile sèche principalement par…",["évaporation de l'eau","oxydation et réticulation des huiles","fusion à chaud","exposition UV"],1,"Le dioxygène réagit avec les doubles liaisons des huiles, qui se relient en réseau."],
+ ["Pourquoi peut-on façonner immédiatement une impression offset UV ?",["L'encre ne contient pas de pigment","Le papier absorbe tout le liant","La polymérisation sous UV est quasi instantanée","Les UV évaporent l'eau"],2,"Les photo-amorceurs déclenchent la polymérisation des acrylates en moins d'une seconde."],
+ ["Qu'est-ce qui distingue un pigment d'un colorant ?",["Le pigment est insoluble et dispersé en particules","Le pigment est toujours d'origine naturelle","Le colorant est toujours noir","Le pigment est dissous dans le solvant"],0,"Pigment : particule solide insoluble. Colorant : molécule dissoute."],
+ ["Pour une affiche exposée trois mois en extérieur, on vise sur l'échelle de laine bleue une note de…",["1 – 2","3 – 4","5","7 – 8"],3,"8 = meilleure tenue ; chaque cran double environ la durée supportée."],
+ ["L'encre perle en petites gouttes sur un film plastique. La cause probable :",["énergie de surface du support trop faible","encre trop pigmentée","papier trop épais","profil ICC erroné"],0,"Il faut que le support dépasse d'environ 10 mN/m la tension de l'encre."],
+ ["Le traitement Corona sert à…",["sécher l'encre","augmenter l'énergie de surface du support","éliminer les COV","rendre l'encre conductrice"],1,"La décharge crée des groupes polaires oxygénés à la surface."],
+ ["Le CMJN repose sur une synthèse…",["additive","soustractive","partitive uniquement","spectrale"],1,"Chaque encre filtre (absorbe) une partie de la lumière renvoyée par le papier."],
+ ["L'engraissement du point est le plus fort sur…",["papier couché brillant","film PET","papier journal","papier calque"],2,"Le papier journal, poreux et non couché, laisse l'encre s'étaler et pénétrer."],
+ ["Quelle encre permet d'imprimer une antenne NFC ?",["Encre thermochromique","Encre conductrice à l'argent","Encre nacrée","Encre au soja"],1,"Les particules d'argent forment, après frittage, un chemin conducteur."],
+ ["Depuis 2023 en France, la loi AGEC interdit dans les encres des imprimés destinés au public…",["les pigments","les huiles minérales","les encres UV","l'eau"],1,"Les huiles minérales (MOSH/MOAH) migrent et nuisent au recyclage."],
+ ["Le rôle principal du liant est de…",["donner la couleur","fixer les pigments au support en formant un film","diluer l'encre","empêcher la mousse"],1,"Sans liant, le pigment n'adhère pas au support."]
+];
+function buildQuiz(){
+  const f=$("#quizForm");f.innerHTML=Q.map((q,i)=>`<fieldset><legend>${i+1}. ${esc(q[0])}</legend>${q[1].map((o,j)=>`<label><input type="radio" name="qz${i}" value="${j}" id="qz${i}_${j}">${esc(o)}</label>`).join("")}<div class="fb" id="fb${i}" hidden></div></fieldset>`).join("");
+  state.quiz=state.quiz||{};
+  Q.forEach((q,i)=>{const v=state.quiz[i];if(v!=null){const r=$(`#qz${i}_${v}`);if(r)r.checked=true}});
+  f.addEventListener("change",e=>{const m=e.target.name.match(/qz(\d+)/);if(m){state.quiz[m[1]]=+e.target.value;save()}});
+  if(state.quizScore!=null)showQuiz();
+}
+function showQuiz(){
+  let s=0;Q.forEach((q,i)=>{const v=state.quiz[i];const fb=$("#fb"+i);fb.hidden=false;if(v===q[2]){s++;fb.className="fb ok";fb.textContent="Juste. "+q[3]}else{fb.className="fb no";fb.textContent=(v==null?"Sans réponse. ":"Faux. ")+"Réponse : "+q[1][q[2]]+". "+q[3]}});
+  $("#quizScore").textContent="Score enregistré : "+state.quizScore+" / "+Q.length+(s!==state.quizScore?" · score actuel : "+s:"");
+}
+$("#quizCheck").addEventListener("click",()=>{
+  const answered=Object.keys(state.quiz||{}).length;
+  if(answered<Q.length){toast("Répondez aux "+Q.length+" questions avant de corriger ("+answered+" faites).");return}
+  if(state.quizScore==null){state.quizScore=Q.reduce((a,q,i)=>a+(state.quiz[i]===q[2]?1:0),0);save()}
+  showQuiz();
+});
+
+/* ---------- 09 sources ---------- */
+const TYPES=["Institutionnelle / scientifique","Professionnelle (fabricant, imprimeur)","Presse spécialisée","Livre","Vidéo d'un professionnel","Autre"];
+const REL=["Très fiable","Fiable","À recouper","Peu fiable"];
+function renderSources(){
+  state.sources=state.sources&&state.sources.length?state.sources:[{},{},{}];
+  const box=$("#sources");
+  box.innerHTML=state.sources.map((s,i)=>`<div class="src" data-i="${i}">
+   <div class="w6 head"><b style="font-family:var(--f-display)">Source ${i+1}</b>${i>2?`<button type="button" data-del="${i}" style="padding:4px 10px">Retirer</button>`:""}</div>
+   <label class="field w3"><span>Type</span><select data-f="type" id="s${i}type"><option value=""></option>${TYPES.map(t=>`<option ${s.type===t?"selected":""}>${t}</option>`).join("")}</select></label>
+   <label class="field w3"><span>Auteur ou organisme</span><input type="text" data-f="auteur" id="s${i}auteur" value="${esc(s.auteur)}"></label>
+   <label class="field w3"><span>Titre</span><input type="text" data-f="titre" id="s${i}titre" value="${esc(s.titre)}"></label>
+   <label class="field w3"><span>URL ou référence</span><input type="text" data-f="url" id="s${i}url" value="${esc(s.url)}" placeholder="https://…"></label>
+   <label class="field w2"><span>Date de publication</span><input type="text" data-f="datep" id="s${i}datep" value="${esc(s.datep)}"></label>
+   <label class="field w2"><span>Consulté le</span><input type="text" data-f="datec" id="s${i}datec" value="${esc(s.datec)}"></label>
+   <label class="field w2"><span>Fiabilité estimée</span><select data-f="fiab" id="s${i}fiab"><option value=""></option>${REL.map(t=>`<option ${s.fiab===t?"selected":""}>${t}</option>`).join("")}</select></label>
+   <label class="field w6"><span>Ce que j'en retiens (avec mes mots) et pourquoi je lui fais confiance</span><textarea data-f="retiens" id="s${i}retiens" style="min-height:70px">${esc(s.retiens)}</textarea></label>
+  </div>`).join("");
+}
+$("#sources").addEventListener("input",e=>{const f=e.target.dataset.f;if(!f)return;const i=+e.target.closest(".src").dataset.i;state.sources[i][f]=e.target.value;save()});
+$("#sources").addEventListener("change",e=>{const f=e.target.dataset.f;if(!f)return;const i=+e.target.closest(".src").dataset.i;state.sources[i][f]=e.target.value;save()});
+$("#sources").addEventListener("click",e=>{const d=e.target.dataset.del;if(d!=null){state.sources.splice(+d,1);save();renderSources()}});
+$("#addSrc").addEventListener("click",()=>{state.sources.push({});save();renderSources()});
+
+/* ---------- 11 synthèse ---------- */
+function countSynth(){const n=words(state.synth);const c=$("#synthCount");c.textContent=n+(n>1?" mots":" mot");c.style.color=n>=150&&n<=250?css("--ok"):n>250?css("--warn"):css("--muted")}
+const SKILLS=[["rech","Rechercher : trouver et évaluer des sources"],["ana","Analyser : relier un phénomène physico-chimique à une contrainte graphique"],["syn","Synthétiser : rédiger un texte structuré et argumenté"]];
+const LV=["Pas encore","En cours","Acquis","Maîtrisé"];
+function renderSelf(){
+  state.self=state.self||{};
+  $("#selfeval").innerHTML=SKILLS.map(([k,t])=>`<div class="r"><span>${t}</span><div class="lvl" role="radiogroup" aria-label="${esc(t)}">${LV.map((l,j)=>`<label><input type="radio" name="se_${k}" value="${l}" id="se_${k}_${j}" ${state.self[k]===l?"checked":""}>${l}</label>`).join("")}</div></div>`).join("");
+  $("#selfeval").addEventListener("change",e=>{const m=e.target.name.match(/se_(\w+)/);if(m){state.self[m[1]]=e.target.value;save()}});
+}
+
+/* ---------- navigation & checklist ---------- */
+const stepDone={
+  identite:()=>state.nom&&state.prenom,
+  composition:()=>words(state.q1)>=10, viscosite:()=>words(state.q2)>=10, sechage:()=>words(state.q3)>=10,
+  pigment:()=>words(state.q4)>=10, mouillage:()=>words(state.q5)>=10, couleur:()=>words(state.q6)>=10, speciales:()=>words(state.q7)>=10,
+  quiz:()=>state.quizScore!=null,
+  recherche:()=>validSources()>=3&&words(state.q8)>=15,
+  cas:()=>state.case&&["c_proc","c_encre","c_sup","c_risk","c_env"].every(k=>words(state[k])>=5),
+  synthese:()=>words(state.synth)>=150&&["d_visc","d_ret","d_pig","d_mou","d_eng"].every(k=>words(state[k])>=3),
+  export:()=>false
+};
+function validSources(){return (state.sources||[]).filter(s=>s.titre&&s.url&&(s.auteur||"").trim()&&words(s.retiens)>=8).length}
+function updateNav(){$$("#stepnav a").forEach(a=>{const f=stepDone[a.dataset.step];a.classList.toggle("done",!!(f&&f()))})}
+function updateChecklist(){
+  const items=[
+    ["Nom et prénom renseignés",stepDone.identite()],
+    ["Questions d'analyse Q1 à Q7 ("+["q1","q2","q3","q4","q5","q6","q7"].filter(k=>words(state[k])>=10).length+" / 7)",["q1","q2","q3","q4","q5","q6","q7"].every(k=>words(state[k])>=10)],
+    ["Quiz corrigé"+(state.quizScore!=null?" ("+state.quizScore+" / "+Q.length+")":""),stepDone.quiz()],
+    ["Au moins 3 sources complètes ("+validSources()+") et croisement Q8",stepDone.recherche()],
+    ["Cas client complété",!!stepDone.cas()],
+    ["Synthèse : définitions et texte de 150 à 250 mots ("+words(state.synth)+" mots)",stepDone.synthese()]
+  ];
+  $("#checklist").innerHTML=items.map(([t,ok])=>`<li class="${ok?"ok":""}">${esc(t)}</li>`).join("");
+}
+
+/* ---------- PDF ---------- */
+const CASES={A:"A · Festival d'été (affiches abribus + t-shirts)",B:"B · Chocolat bio (film compostable, or, NFC)",C:"C · Catalogue express (200 p., recyclé, 48 h)",D:"D · Carte interactive (thermochromie, encre UV)"};
+const QT={q1:"Q1 · Composition : pâteuse ou liquide ?",q2:"Q2 · Viscosité : tote bags et dépliants",q3:"Q3 · Séchage : brochures en 24 h",q4:"Q4 · Pigments : cahier des charges signalétique",q5:"Q5 · Mouillabilité : sachet compostable",q6:"Q6 · Engraissement : photo sur recyclé",q7:"Q7 · Encre spéciale : affiche interactive"};
+function ans(v){return v&&v.trim()?`<div class="ans">${esc(v.trim())}</div>`:`<div class="ans empty">Non renseigné</div>`}
+function buildReport(){
+  const n=(state.nom||"").toUpperCase(),p=state.prenom||"";
+  const bar=`<div class="rbar"><span style="background:#009FD8"></span><span style="background:#D6006F"></span><span style="background:#F5C400"></span><span style="background:#15171F"></span></div>`;
+  let h=bar+`<h1>Ce que l'encre impose au graphiste</h1><div>Dossier de recherche, d'analyse et de synthèse · Physique-chimie · DN MADe Graphisme · ESAAT</div>
+  <div class="meta"><div><small>Nom</small><b>${esc(n)}</b></div><div><small>Prénom</small><b>${esc(p)}</b></div><div><small>Classe</small>${esc(state.classe||"")}</div><div><small>Date</small>${esc(state.date||"")}</div></div>`;
+  h+=`<h2>1. Analyse des notions</h2>`;Object.keys(QT).forEach(k=>{h+=`<h3>${QT[k]}</h3>`+ans(state[k])});
+  h+=`<h2>2. Quiz de connaissances</h2><p>Score à la première correction : <b>${state.quizScore!=null?state.quizScore+" / "+Q.length:"non corrigé"}</b></p>`;
+  if(state.quizScore!=null){h+=`<p style="font-size:9pt">Questions manquées : ${Q.map((q,i)=>state.quiz[i]!==q[2]?(i+1):null).filter(Boolean).join(", ")||"aucune"}</p>`}
+  h+=`<h2>3. Recherche documentaire</h2><p><b>Notion approfondie :</b> ${esc(state.notion||"—")}</p><table><thead><tr><th>#</th><th>Référence</th><th>Type</th><th>Fiabilité</th></tr></thead><tbody>`;
+  (state.sources||[]).forEach((s,i)=>{if(!(s.titre||s.url||s.auteur))return;h+=`<tr><td>${i+1}</td><td>${esc(s.auteur||"?")}. <i>${esc(s.titre||"?")}</i>${s.datep?", "+esc(s.datep):""}. ${esc(s.url||"")}${s.datec?" (consulté le "+esc(s.datec)+")":""}</td><td>${esc(s.type||"")}</td><td>${esc(s.fiab||"")}</td></tr>`});
+  h+=`</tbody></table>`;
+  (state.sources||[]).forEach((s,i)=>{if(s.retiens&&s.retiens.trim())h+=`<h3>Source ${i+1} : ce que j'en retiens</h3>`+ans(s.retiens)});
+  h+=`<h3>Q8 · Croisement des sources</h3>`+ans(state.q8);
+  h+=`<h2>4. Cas client</h2><p><b>Brief choisi :</b> ${esc(CASES[state.case]||"aucun")}</p><table><tbody>
+   <tr><th style="width:30%">Procédé</th><td>${esc(state.c_proc||"")}</td></tr><tr><th>Encre</th><td>${esc(state.c_encre||"")}</td></tr><tr><th>Support et préparation</th><td>${esc(state.c_sup||"")}</td></tr><tr><th>Risques et parades</th><td>${esc(state.c_risk||"")}</td></tr><tr><th>Environnement</th><td>${esc(state.c_env||"")}</td></tr></tbody></table>`;
+  h+=`<h2>5. Synthèse</h2><table><tbody>${[["Viscosité","d_visc"],["Réticulation","d_ret"],["Pigment","d_pig"],["Mouillabilité","d_mou"],["Engraissement du point","d_eng"]].map(([l,k])=>`<tr><th style="width:30%">${l}</th><td>${esc(state[k]||"")}</td></tr>`).join("")}</tbody></table>
+   <h3>Texte de synthèse (${words(state.synth)} mots)</h3>`+ans(state.synth);
+  h+=`<h2>6. Évaluation des compétences</h2><table class="grid-eval"><thead><tr><th>Compétence</th><th>Auto-évaluation</th><th>Pas encore</th><th>En cours</th><th>Acquis</th><th>Maîtrisé</th></tr></thead><tbody>${SKILLS.map(([k,t])=>`<tr><td>${t}</td><td style="text-align:center">${esc((state.self||{})[k]||"—")}</td><td></td><td></td><td></td><td></td></tr>`).join("")}</tbody></table>
+   <div class="sign"><div>Appréciation de l'enseignant :</div><div>Signature et date :</div></div>
+   <div class="foot">Document généré le ${new Date().toLocaleString("fr-FR")} depuis l'atelier numérique « Encres ».</div>`;
+  $("#report").innerHTML=h;
+}
+$("#makePdf").addEventListener("click",()=>{
+  if(!state.nom||!state.prenom){toast("Renseignez votre nom et votre prénom (étape 00).");location.hash="#identite";$("#nom").focus();return}
+  buildReport();
+  const old=document.title;const clean=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9-]+/g,"_");
+  document.title="Encres_"+clean(state.nom.toUpperCase())+"_"+clean(state.prenom);
+  setTimeout(()=>{window.print();setTimeout(()=>document.title=old,1000)},60);
+});
+window.addEventListener("beforeprint",buildReport);
+
+/* ---------- sauvegarde fichier ---------- */
+$("#saveJson").addEventListener("click",()=>{
+  const blob=new Blob([JSON.stringify(state,null,1)],{type:"application/json"});const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);a.download="sauvegarde_encres_"+((state.nom||"eleve").replace(/\W+/g,"_"))+".json";document.body.appendChild(a);a.click();a.remove();toast("Sauvegarde téléchargée.");
+});
+$("#loadJsonBtn").addEventListener("click",()=>$("#loadJson").click());
+$("#loadJson").addEventListener("change",e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{state=JSON.parse(r.result);save();location.reload()}catch(err){toast("Ce fichier n'est pas une sauvegarde valide.")}};r.readAsText(f)});
+$("#reset").addEventListener("click",()=>{$("#resetConfirm").hidden=false});
+$("#resetNo").addEventListener("click",()=>{$("#resetConfirm").hidden=true});
+$("#resetYes").addEventListener("click",()=>{try{localStorage.removeItem(KEY)}catch(e){}state={};location.reload()});
+
+/* ---------- init ---------- */
+bindFields();buildQuiz();renderSources();renderSelf();countSynth();
+drawRecipe();viscLabels();setDry("ox");drawPig();drawDrop();drawDot();
+requestAnimationFrame(drawVisc);requestAnimationFrame(drawDry);
+updateNav();updateChecklist();
+if(window.matchMedia)matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{drawRecipe();drawPig();drawDrop();drawDot()});
+})();
+</script>
+</body>
+</html>
